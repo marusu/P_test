@@ -1,0 +1,39 @@
+f = open('test2.txt', 'r', encoding='UTF-8')  #監視ログファイルの読み込み
+
+l1 = f.readlines()  #ファイル内を1行ずつリストへ格納
+
+open('result2.txt', 'w').close()  #予め用意したresult1.txtの中身を空にする
+count = 0  #l1リスト内の要素数（監視ログの行数）カウント用
+check_count = 0  #タイムアウトした行からping応答がある行まで行数を進める際に使用
+while_count = 0  # #while文の処理回数カウント用
+count_l = []
+N = int(input())
+
+
+for data in l1:  #リスト内を1行ずつdata変数に格納,リスト内の要素数分だけ繰り返す   
+    count += 1  #何回目のループ（何要素目）かカウントしておく
+#     print(count)
+#     print(data)
+    if "-" in data:  #「-」があったら（pingがタイムアウトしていたら）if文内の処理
+        count_l.append(count)  #タイムアウトしている要素の番号（何行目か）をcount_lリストに格納
+#     print(str(count_l) + "\n")
+    
+for i in range(len(count_l)):  #タイムアウトしている要素の数だけ繰り返す
+    if check_count <= count_l[i]:  #check_countがタイムアウトしている要素の番号以下なら下の処理を適用
+        check_count = count_l[i]  #タイムアウトしている要素の番号（行数）をcheck_countに保存
+        while check_count in count_l:  #check_countの値がping応答のある行数と等しくなるまで1行ずつ進める
+            while_count += 1  #N回以上連続してタイムアウトしたかどうかの判定時に使用
+            check_count += 1
+#             print(check_count)
+        if while_count >= N:  #N回以上連続してタイムアウトしたかどうかの判定
+            FP = str(int(l1[check_count - 1].split(",")[0]) - int(l1[count_l[i] - 1].split(",")[0]))   #故障期間割り出しの計算
+            FP2 = FP.zfill(12)  #右詰め、何もないところは0埋め
+#             print(FP2)
+            print("故障状態のサーバアドレス　：" + str(l1[count_l[i]-1].split(",")[1]))
+            print("サーバの故障期間　："+str(l1[count_l[i] - 1].split(",")[0]) + ".000～" + str(l1[check_count - 1].split(",")[0]) + str(int(l1[check_count - 1].split(",")[2])/1000).strip("0") + " ："+FP2[-12:-10]+"年"+FP2[-10:-8]+"カ月"+FP2[-8:-6]+"日"+FP2[-6:-4]+"時間"+FP2[-4:-2]+"分"+FP2[-2:]+str(int(l1[check_count - 1].split(",")[2])/1000).strip("0")+"秒間\n")
+            
+            n = open('result2.txt', 'a', encoding='UTF-8')  #ファイルへの保存
+            n.write("故障状態のサーバアドレス　：" + str(l1[count_l[i]-1].split(",")[1])+"\n")
+            n.write("サーバの故障期間　："+str(l1[count_l[i] - 1].split(",")[0]) + ".000～" + str(l1[check_count - 1].split(",")[0]) + str(int(l1[check_count - 1].split(",")[2])/1000).strip("0") + " ："+FP2[-12:-10]+"年"+FP2[-10:-8]+"カ月"+FP2[-8:-6]+"日"+FP2[-6:-4]+"時間"+FP2[-4:-2]+"分"+FP2[-2:]+str(int(l1[check_count - 1].split(",")[2])/1000).strip("0")+"秒間\n\n")
+            n.close()
+f.close()

@@ -1,0 +1,32 @@
+f = open('test1.txt', 'r', encoding='UTF-8')  #監視ログファイルの読み込み
+
+l1 = f.readlines()  #ファイル内を1行ずつリストへ格納
+
+open('result1.txt', 'w').close()  #予め用意したresult1.txtの中身を空にする
+count = 0
+for data in l1:  #リスト内を1行ずつdata変数に格納　#リスト内の要素数分だけ繰り返す   
+    count += 1  #何回目のループ（何要素目）かカウントしておく
+#     print(data)
+    if "-" in data:  #「-」があったら（pingがタイムアウトしていたら）if文内の処理
+        l2 = data.split(",")  #現在の要素を「,」で区切ってリスト化
+        next_data = l1[count]  #次の要素を変数に格納
+        l3 = next_data.split(",")  #次の行を「,」で区切ってリスト化
+#         print(l2)
+#         print(l3)
+        SA = l2[1]  #l2リストの2番目の要素（故障状態のサーバアドレス）をSAに格納
+        FPy = str(int(l3[0][0:4]) - int(l2[0][0:4]))  #サーバの故障期間（年）をFPyに格納
+        FPmo = str(int(l3[0][4:6]) - int(l2[0][4:6]))  #サーバの故障期間（月）をFPmoに格納
+        FPd = str(int(l3[0][6:8]) - int(l2[0][6:8]))  #サーバの故障期間（日）をFPdに格納
+        FPh = str(int(l3[0][8:10]) - int(l2[0][8:10]))  #サーバの故障期間（時間）をFPhに格納
+        FPm = str(int(l3[0][10:12]) - int(l2[0][10:12]))  #サーバの故障期間をFPm（分）に格納
+        FPs = str(int(l3[0][12:14]) - int(l2[0][12:14]) + (int(l3[2])/1000))  #サーバの故障期間（秒）をFPsに格納,応答にかかった時間も考慮
+        print("故障状態のサーバアドレス　："+str(SA))
+        print("サーバの故障期間　："+l2[0]+".000～"+str(int(l3[0]))+str(int(l3[2])/1000).strip("0")+" ："+FPy+"年"+FPmo+"カ月"+FPd+"日"+FPh+"時間"+FPm+"分"+FPs+"秒間\n")
+
+        
+        n = open('result1.txt', 'a', encoding='UTF-8')  #ファイルへの保存
+        n.write("故障状態のサーバアドレス　："+str(SA)+"\n")
+        n.write("サーバの故障期間　："+l2[0]+".000～"+str(int(l3[0]))+str(int(l3[2])/1000).strip("0")+" ："+FPy+"年"+FPmo+"カ月"+FPd+"日"+FPh+"時間"+FPm+"分"+FPs+"秒間\n")
+        n.close()
+
+f.close()

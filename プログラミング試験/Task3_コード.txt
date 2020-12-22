@@ -1,0 +1,83 @@
+f = open('test3.txt', 'r', encoding='UTF-8') #監視ログファイルの読み込み
+open('result3.txt', 'w').close() #予め用意したresult1.txtの中身を空にする
+
+l1 = f.readlines() #ファイル内を1行ずつリストへ格納 
+l1.reverse()  #l1リストの並び替え（逆順）
+
+l1_1 =[]
+l1_2 =[]
+s_count = 0 #l1リスト内の要素数（監視ログの行数）カウント用 
+count_1 = 0 #l1_1リスト内の要素数カウント用 
+count_2 = 0 #l1_2リスト内の要素数カウント用 
+l2_1 = []
+l2_2 = []
+l2.clear 
+m = int(input())   #入力
+t = int(input())   #入力
+
+for div in l1: #リスト内を1行ずつdiv変数に格納,リストの要素数分だけ繰り返す 
+    s_count += 1  #行数の把握用
+    #リスト内データを2つのサーバーごとに振り分けてそれぞれリストに格納
+    if div.split(",")[1][0:9] == "10.20.30.":   
+        l1_1.append(div) 
+    elif div.split(",")[1][0:10] == "192.168.1.": 
+        l1_2.append(div)
+        
+#サーバ1
+for i in range(m): #入力値 m回だけ繰り返す
+    count_1 += 1 #何回目のループ（何要素目）かカウント 
+    data=int(l1_1[count_1-1].split(",")[2])  #dataに応答結果を保存
+#     print(data)   
+    l2_1.append(data)  #応答結果のみをl2_1リストに格納 
+    ave = sum(l2_1)/count_1   #応答結果の平均値算出
+#     print(ave)
+if ave >= t :   #応答結果が指定値を超えている場合if文内処理
+    print("過負荷状態です") 
+    while ave >= t :   #応答結果が指定値を超えなくなるまで繰り返し
+        count_1 += 1   #何回目のループ（何要素目）かカウント 
+        data=int(l1_1[count_1-1].split(",")[2])   #dataにdataに応答結果を保存
+        l2_1.append(data)  #応答結果のみをl2_1リストに格納
+        ave = sum(l2_1)/count_1  #応答結果の平均値算出
+        print(data) 
+        print(ave) 
+        print(count_1) 
+        OP=str(int(l1_1[0].split(",")[0])-int(l1_1[count_1-1].split(",")[0]))   #過負荷期間割り出しの計算
+        OP2 = OP.zfill(12) #右詰め、何もないところは0埋め print(OP2)
+    print("過負荷状態のサーバアドレス　：" + str(l1_1[count_1-1].split(",")[1])) 
+    print("サーバの過負荷期間　："+str(l1_1[count_1-1].split(",")[0]) + ".000～" + str(l1_1[0].split(",")[0]) + " ："+OP2[-12:-10]+"年"+OP2[-10:-8]+"カ月"+OP2[-8:-6]+"日"+OP2[-6:-4]+"時間"+OP2[-4:-2]+"分"+OP2[-2:]+"秒間\n")
+    n = open('result3.txt', 'a', encoding='UTF-8')  #ファイルへの保存
+    n.write("過負荷状態のサーバアドレス　：" + str(l1_1[count_1-1].split(",")[1])+"\n")
+    n.write("サーバの過負荷期間　："+str(l1_1[count_1-1].split(",")[0]) + ".000～" + str(l1_1[0].split(",")[0]) + " ："+OP2[-12:-10]+"年"+OP2[-10:-8]+"カ月"+OP2[-8:-6]+"日"+OP2[-6:-4]+"時間"+OP2[-4:-2]+"分"+OP2[-2:]+"秒間\n\n")
+    n.close()
+else:
+    print("過負荷状態ではありません")
+    
+#サーバ2（サーバ1と同様のためコメント省略）
+for i in range(m): 
+    count_2 += 1 
+    data=int(l1_2[count_2-1].split(",")[2]) 
+#     print(data) 
+    l2_2.append(data) 
+    ave = sum(l2_2)/count_2 
+#     print(ave)
+if ave >= t : 
+    print("過負荷状態です") 
+    while ave >= t : 
+        count_2 += 1 
+        data=int(l1_2[count_2-1].split(",")[2])
+        l2_2.append(data)
+        ave = sum(l2_2)/count_2 
+        print(ave) 
+        print(count_2) 
+        OP=str(int(l1_2[0].split(",")[0])-int(l1_2[count_2-1].split(",")[0])) 
+        OP2 = OP.zfill(12) 
+    print("過負荷状態のサーバアドレス　：" + str(l1_2[count_2-1].split(",")[1])) 
+    print("サーバの過負荷期間　："+str(l1_2[count_2-1].split(",")[0]) + ".000～" + str(l1_2[0].split(",")[0]) + " ："+OP2[-12:-10]+"年"+OP2[-10:-8]+"カ月"+OP2[-8:-6]+"日"+OP2[-6:-4]+"時間"+OP2[-4:-2]+"分"+OP2[-2:]+"秒間\n")
+    n = open('result3.txt', 'a', encoding='UTF-8') #ファイルへの保存
+    n.write("過負荷状態のサーバアドレス　：" + str(l1_2[count_2-1].split(",")[1])+"\n")
+    n.write("サーバの過負荷期間　："+str(l1_2[count_2-1].split(",")[0]) + ".000～" + str(l1_2[0].split(",")[0]) + " ："+OP2[-12:-10]+"年"+OP2[-10:-8]+"カ月"+OP2[-8:-6]+"日"+OP2[-6:-4]+"時間"+OP2[-4:-2]+"分"+OP2[-2:]+"秒間\n")
+    n.close()
+else:
+    print("過負荷状態ではありません")
+
+f.close()
